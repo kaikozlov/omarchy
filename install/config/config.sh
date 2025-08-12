@@ -6,6 +6,23 @@ cp -R ~/.local/share/omarchy/config/* ~/.config/
 # Use default bashrc from Omarchy
 cp ~/.local/share/omarchy/default/bashrc ~/.bashrc
 
+# Setup Fish shell configuration if Fish is installed
+if command -v fish >/dev/null 2>&1; then
+  mkdir -p ~/.config/fish
+  # Only install our Fish config if none exists yet
+  if [ ! -f ~/.config/fish/config.fish ]; then
+    cp ~/.local/share/omarchy/default/fish/config.fish ~/.config/fish/config.fish
+  fi
+  # Always install conf.d drop-in to source Omarchy Fish rc
+  mkdir -p ~/.config/fish/conf.d
+  tee ~/.config/fish/conf.d/omarchy.fish >/dev/null <<'FISHCONF'
+# Load Omarchy defaults for Fish
+if test -f ~/.local/share/omarchy/default/fish/rc.fish
+  source ~/.local/share/omarchy/default/fish/rc.fish
+end
+FISHCONF
+fi
+
 # Ensure application directory exists for update-desktop-database
 mkdir -p ~/.local/share/applications
 
@@ -45,7 +62,10 @@ if [[ -n "${OMARCHY_USER_NAME//[[:space:]]/}" ]]; then
   git config --global user.name "$OMARCHY_USER_NAME"
 fi
 
-if [[ -n "${OMARCHY_USER_EMAIL//[[:space:]]/}" ]]; then
+# Prefer explicit git email if provided, else fall back to primary user email
+if [[ -n "${OMARCHY_GIT_EMAIL//[[:space:]]/}" ]]; then
+  git config --global user.email "$OMARCHY_GIT_EMAIL"
+elif [[ -n "${OMARCHY_USER_EMAIL//[[:space:]]/}" ]]; then
   git config --global user.email "$OMARCHY_USER_EMAIL"
 fi
 

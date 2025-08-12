@@ -1,0 +1,8 @@
+quit-after-last-window-closed
+font-family = "FiraCode Nerd Font Mono"
+theme = dark:"Monokai Pro",light:"Monokai Pro Light"
+font-size = 14
+cursor-style = "bar"
+cursor-click-to-move = true
+background-opacity = .90
+background-blur = 20

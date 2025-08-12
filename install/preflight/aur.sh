@@ -15,27 +15,43 @@ if [[ "$(uname -m)" == "x86_64" ]] && ! command -v yay &>/dev/null; then
     fi
 
     # Install yay directly from Chaotic-AUR
-    sudo pacman -Sy --needed --noconfirm yay
+    sudo pacman -Sy --needed --noconfirm paru
   else
     echo "Failed to install Chaotic-AUR, so won't include it in pacman config!"
   fi
 fi
 
 # Manually install yay from AUR if not already available
-if ! command -v yay &>/dev/null; then
+if ! command -v paru &>/dev/null; then
   # Install build tools
   sudo pacman -Sy --needed --noconfirm base-devel
   cd /tmp
-  rm -rf yay-bin
+  rm -rf paru-bin
   git clone https://aur.archlinux.org/yay-bin.git
-  cd yay-bin
+  cd paru-bin
   makepkg -si --noconfirm
   cd -
-  rm -rf yay-bin
+  rm -rf paru-bin
   cd ~
+fi
+
+# Symlink paru to yay
+if ! command -v yay &>/dev/null; then
+  sudo ln -s /usr/bin/paru /usr/bin/yay
 fi
 
 # Add fun and color to the pacman installer
 if ! grep -q "ILoveCandy" /etc/pacman.conf; then
   sudo sed -i '/^\[options\]/a Color\nILoveCandy' /etc/pacman.conf
+fi
+
+# Set Parallel Downloads = 10 in pacman.conf
+if ! grep -q "^ParallelDownloads *= *10" /etc/pacman.conf; then
+  if grep -q "^#ParallelDownloads" /etc/pacman.conf; then
+    sudo sed -i 's/^#ParallelDownloads.*/ParallelDownloads = 10/' /etc/pacman.conf
+  elif grep -q "^ParallelDownloads" /etc/pacman.conf; then
+    sudo sed -i 's/^ParallelDownloads.*/ParallelDownloads = 10/' /etc/pacman.conf
+  else
+    sudo sed -i '/^\[options\]/a ParallelDownloads = 10' /etc/pacman.conf
+  fi
 fi
